@@ -20,8 +20,8 @@ def custom_infere(data, configs, paths, xml_path):
     result = os.system(
         f'python ./apps/pathology/lib/infers/infere.py --directory "{directory}" --xml_path "./datasets/labels/final/{xml_path}"')
 
-    if os.path.exists(f'./datasets/labels/final/{xml_path}'):
-        patch_name = xml_path.split('/')[-1].split('.')[0]
+    patch_name = xml_path.split('/')[-1].split('.')[0]
+    if os.path.exists(f'./datasets/{patch_name}.png'):
         os.remove(f'./datasets/{patch_name}.png')
 
     try:

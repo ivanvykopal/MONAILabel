@@ -243,7 +243,7 @@ def main(directory='tmp', xml_path=None):
         cell_mask = get_cell_mask(gj, data.shape)
     except Exception:
         print('No xml file found')
-        cell_mask = np.zeros_like(data)
+        cell_mask = np.zeros(data.shape[:2], dtype='uint8')
 
     networks = []
     for idx, config in enumerate(configs):

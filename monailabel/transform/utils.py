@@ -158,7 +158,7 @@ def postprocess_inflammation(gdf, gdf_immune):
 
 def postprocess_vessels(gdf, gdf_tissue):
     for idx, row in gdf.iterrows():
-        if row['classification']['name'] == 'Blood vessels' and any(gdf_tissue.boundary.intersects(row.geometry.boundary)):
+        if row['classification']['name'] == 'Blood vessels' and (any(gdf_tissue.boundary.intersects(row.geometry.boundary)) or not any(gdf_tissue.contains(row.geometry))):
             gdf.drop(idx, inplace=True)
 
     return gdf

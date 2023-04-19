@@ -3,7 +3,7 @@
 Minimálne požiadavky na hardware:
  - 8GB CPU RAM
  - Grafická karta podporujúca Cuda - [zoznam](https://developer.nvidia.com/cuda-gpus)
- - Grafická karta minimálne s 4GB pamäte
+ - Grafická karta minimálne s 2GB pamäte
 
 
 ## Inštalácia
@@ -15,7 +15,7 @@ Jednotlivé kroky inštalácie pozostávajú z inštalácie QuPath a inštaláci
 ### QuPath
 
 1. Stiahnite [QuPath](https://qupath.github.io/) z oficiálnej stránky.
-2. Po stiahnutí inštalátora, spustite samotnú inštaláciu nástroj QuPath a postupujte podľa jednotlivých krokov.
+2. Po stiahnutí inštalátora, spustite samotnú inštaláciu nástroja QuPath a postupujte podľa jednotlivých krokov.
 
 ### MONAI Label
 
@@ -56,7 +56,7 @@ Pre nainštalovanie MONAI Label spolu s pridanými modelmi pre segmentáciu vyš
       ```
 7. Stiahnuť a nainštalovať [Cuda Toolkit 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive). Postupujte podľa krokov inštalácie. 
 8. Po nainštalovaní Cuda Toolkit je potrebné reštartovať počítač pre správnu konfiguráciu a nastavenie Cuda.
-9. Stiahnuť [openslide binaries](https://openslide.org/download/) a Extrahovať ich na ľubovolnom mieste. Po extrakcii je potrebné pridať cetu k `bin` adresáru do premenných prostredia v `PATH`.
+9. Stiahnuť [openslide binaries](https://openslide.org/download/) a extrahovať ich na ľubovolnom mieste. Po extrakcii je potrebné pridať cetu k `bin` adresáru do premenných prostredia v `PATH`.
 10. Pridať do premenných prostedia do `PATH` cestu k `monailabel\scripts` nachádzajúcich sa v tomto adresári (Príklad pre [macOS](https://www.cyberciti.biz/faq/appleosx-bash-unix-change-set-path-environment-variable/)). V prípade, ak chýba jú nejaké `dll` knižnice je ich možné stiahnuť z [dll-files.com](https://www.dll-files.com/) a konkrétne, ak by išlo o chýbajúce `cudnn64_8.dll`, tak je ho možné stiahnuť pomocou tohto [odkazu](https://www.dll-files.com/cudnn64_8.dll.html). Stiahnuté `dll` súbory je potrebné skopírovať na systémový disk štandarde na windows systémoch je to `C:\Windows\System32`.
 11. Stiahnuť najnovšie MONAI Label rozšírenie pre QuPath z [repozitára](https://github.com/ivanvykopal/MONAILabel/tags). Najnovšie rozšírenie sa nachádza v poslednom `Release` ako `qupath-extension-monailabel-{version}.jar`, pričom `version` predstavuje identifikátor poslednej verzie, príklad verzie `0.3.1.5`.
 12. Pre pridanie MONAI Label rozšírenia je potrebné spustiť QuPath a stiahnutý súbor `qupath-extension-monailabel-{version}.jar` potiahnuť do oblasti QuPath a odsúhlasiť dialogove okno. Týmto sa do QuPath nainštaluje rozšírenie pre MONAI Label.
@@ -64,6 +64,14 @@ Pre nainštalovanie MONAI Label spolu s pridanými modelmi pre segmentáciu vyš
 14. Po spustení QuPath v časti `Edit` > `Preferences...` > `MONAI Label` zmente Server URL na `http://0.0.0.0:8000`.
 
 ## Spustenie servera
+
+Prvý spôsob spustenie servera je s využitím vytvoreného scriptu `start_server.bat`, ktorý je možné spustiť príkazom:
+
+```bash
+start_server
+```
+
+V prípade ak server sa nenaštartuje, tak je potrebné manuálne spustenie s využitím nasledovných príkazov.
 
 Pred spustením servera je potrebné spustiť Python prostredie:
  - `venv`
@@ -75,8 +83,7 @@ Pred spustením servera je potrebné spustiť Python prostredie:
  conda activate monailabel
  ```
 
- Následne by sme mali vedieť spustiť Server pre MONAI Label:
-
+Spustenie servera:
 ```bash
 monailabel start_server --app apps/pathology --studies datasets/
 ```
@@ -99,9 +106,8 @@ monailabel start_server --app apps/pathology --studies datasets/
 3. Zvoľte možnosť `MONAI Label` > `Annotations...` a následne vyberte model, ktorým chcete vykonať predikciu v časti `Model Name`.
 
     Aktuálne dostupné modely sú:
-      - `deeplab_structure` - DeepLabV3+ pre predikciu ciev, zápalu a endokardu v H&E snímkoch
-      - `nestedunet_structure` - U-Net++ pre predikciu ciev, zápalu a endokardu v H&E snímkoch
-      - TODO: `unet_srel` - U-Net pre predikciu endokardu v SRel snímkoch
+      - `deeplab_structure` - DeepLabV3+ pre predikciu ciev, zápalu a endokardu v H&E snímkach
+      - `nestedunet_structure` - U-Net++ pre predikciu ciev, zápalu a endokardu v H&E snímkach
 
     Po výbere modelu stlačte `OK`.
 
