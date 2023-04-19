@@ -71,21 +71,19 @@ class NestedUnetStructure(BundleInferTask):
         }
         self._config["label_colors"] = self.label_colors
 
-    # TODO: pozrieť sa na toto
     def pre_transforms(self, data=None) -> Sequence[Callable]:
         t = [LoadImagePatchd(keys="image", mode="RGB",
                              dtype=np.uint8, padding=False)]
         t.extend([x for x in super().pre_transforms(data)])
         return t
 
-    # TODO: pozrieť sa na toto
     def post_transforms(self, data=None, xml_path=None) -> Sequence[Callable]:
         t = [x for x in super().post_transforms(data)]
         t.extend(
             [
                 PostFilterLabeld(keys="pred"),
-                PostProcess(keys="pred"),
                 PostProcessAnnotations(keys="pred", xml_path=xml_path),
+                PostProcess(keys="pred"),
                 FindContoursCustom(keys="pred", labels=self.labels,
                                    max_poly_area=128 * 128),
             ]

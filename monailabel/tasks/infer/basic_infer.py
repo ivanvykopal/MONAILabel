@@ -526,7 +526,7 @@ class BasicInferTask(InferTask):
 
                 inputs = data[self.input_key]
                 inputs = inputs.cpu().numpy()
-                inputs = inputs if isinstance(inputs, tf.Tensor) else tf.convert_to_tensor(inputs)
+                #inputs = inputs if isinstance(inputs, tf.Tensor) else tf.convert_to_tensor(inputs)
 
                 data[self.output_label_key] = custom_infere(inputs, configs, self.path, self.xml_path)
         else:
