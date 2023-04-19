@@ -107,8 +107,13 @@ def run_wsi_inference(
             request["session"] = session.to_json()
 
     logger.info(f"WSI Infer Request: {request}")
-
-    result = instance.infer_wsi(request)
+    try:
+        result = instance.infer_wsi(request)
+    except Exception as e:
+        xml_path = f'{request["image_name"]}-patch-{request["location"][0]}_{request["location"][1]}_{request["size"][0]}_{request["size"][1]}.xml'
+        if os.path.exists(f'./datasets/labels/final/{xml_path}'):
+            os.remove(f'./datasets/labels/final/{xml_path}')
+        raise e
     if result is None:
         raise HTTPException(status_code=500, detail="Failed to execute wsi infer")
     return send_response(instance.datastore(), result, output, background_tasks)

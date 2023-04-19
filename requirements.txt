@@ -50,5 +50,6 @@ albumentations
 geojson
 geopandas
 numba
+rtree
 
 #sudo apt-get install openslide-tools -y

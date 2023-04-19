@@ -2,6 +2,7 @@ import numpy as np
 import os
 import shutil
 import json
+import torch
 
 
 def custom_infere(data, configs, paths, xml_path):
@@ -13,18 +14,21 @@ def custom_infere(data, configs, paths, xml_path):
     json.dump(paths, open(f'{directory}/paths.json', 'w'))
     np.save(f'{directory}/data.npy', data)
 
+    del data
+    torch.cuda.empty_cache()
+
     result = os.system(
         f'python ./apps/pathology/lib/infers/infere.py --directory "{directory}" --xml_path "./datasets/labels/final/{xml_path}"')
 
     if os.path.exists(f'./datasets/labels/final/{xml_path}'):
         patch_name = xml_path.split('/')[-1].split('.')[0]
-        os.remove(f'./datasets/labels/final/{xml_path}')
         os.remove(f'./datasets/{patch_name}.png')
 
     try:
         mask = np.load(f'{directory}/mask.npy')
         shutil.rmtree('tmp')
-    except:
+    except Exception as e:
+        print(e)
         shutil.rmtree('tmp')
         raise Exception('Error with inference.')
 

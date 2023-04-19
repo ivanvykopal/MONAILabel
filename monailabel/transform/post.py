@@ -23,14 +23,13 @@ from monai.utils import InterpolateMode, convert_to_numpy, ensure_tuple_rep
 from shapely.geometry import Point, Polygon
 from torchvision.utils import make_grid, save_image
 import geopandas as gpd
+import os
+import rtree
 
 from monailabel.utils.others.label_colors import get_color
 from monailabel.transform.utils import create_geojson, xml2geojson, get_cells, get_mask, postprocess_endocard, postprocess_inflammation, postprocess_vessels
 
 logger = logging.getLogger(__name__)
-
-
-# TODO:: Move to MONAI ??
 
 
 class LargestCCd(MapTransform):
@@ -299,9 +298,45 @@ class PostProcess(MapTransform):
 
                 final_mask[:, :, label_idx] = np.moveaxis(mask, 0, 1)
 
-            d[key] = final_mask
+            d[key] = self._merge_nearest_endocards(final_mask)
 
         return d
+
+    def _find_distance(self, gdf_endocard):
+        idx = rtree.index.Index()
+        for i, row in gdf_endocard.iterrows():
+            idx.insert(i, row.geometry.bounds)
+
+        for i, row in gdf_endocard.iterrows():
+            for j in idx.intersection(row.geometry.buffer(15).bounds):
+                if i < j and row.geometry.distance(gdf_endocard.loc[j, 'geometry']) < 15:
+                    return True
+
+        return False
+
+    def _merge_nearest_endocards(self, mask):
+        endocard_mask = mask[:, :, 2]
+        struct_elem = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
+        dilate_count = 0
+
+        while True:
+            geojson_file = create_geojson(endocard_mask, [
+                "endocariums"
+            ])
+            gdf_endocard = gpd.GeoDataFrame.from_features(geojson_file)
+
+            distance = self._find_distance(gdf_endocard)
+            if distance:
+                endocard_mask = cv2.dilate(endocard_mask, struct_elem)
+                dilate_count += 1
+            else:
+                break
+
+        for _ in range(dilate_count):
+            endocard_mask = cv2.erode(endocard_mask, struct_elem)
+
+        mask[:, :, 2] = endocard_mask
+        return mask
 
 
 class PostProcessAnnotations(MapTransform):
@@ -347,9 +382,10 @@ class PostProcessAnnotations(MapTransform):
                 gdf.to_dict(orient='records'),
                 ["Blood vessels", "Inflammation", "Endocardium"]
             )
-
             d[key] = final_mask
 
+        if os.path.exists(f'./datasets/labels/final/{self.xml_path}'):
+            os.remove(f'./datasets/labels/final/{self.xml_path}')
         return d
 
 
