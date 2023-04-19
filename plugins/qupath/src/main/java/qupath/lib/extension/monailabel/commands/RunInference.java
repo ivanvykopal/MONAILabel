@@ -131,16 +131,18 @@ public class RunInference implements Runnable {
       if (isWSI) {
         list.addStringParameter("Location", "Location (x,y,w,h)", Arrays.toString(bbox));
         list.addIntParameter("TileSize", "TileSize", tileSize);
-        annotationXML = getAnnotationsXml(image, imageData, new int[4]);
+        annotationXML = getAnnotationsXml(image, imageData, bbox);
         boolean validImage = MonaiLabelClient.imageExists(image);
         if (!validImage) {
           Path imagePatch = java.nio.file.Files.createTempFile("patch", ".png");
           String patchName = isWSI ? image + String.format("-patch-%d_%d_%d_%d", bbox[0], bbox[1], bbox[2], bbox[3])
               : image;
           ImageInfo imageInfo = MonaiLabelClient.saveImage(patchName, imagePatch.toFile(), "{}");
-          MonaiLabelClient.saveLabel(imageInfo.image, annotationXML.toFile(), null, "{}");
+          if (annotationXML != null) {
+            MonaiLabelClient.saveLabel(imageInfo.image, annotationXML.toFile(), null, "{}");
+          }
         }
-        if (validImage) {
+        if (validImage && annotationXML != null) {
           MonaiLabelClient.saveLabel(image, annotationXML.toFile(), null, "{}");
         }
       }
@@ -253,10 +255,10 @@ public class RunInference implements Runnable {
     }
 
     logger.info("Total Objects saved: " + count);
-    if (count == 0) {
-      throw new IOException("ZERO annotations found (nothing to save/submit)");
+    if (count != 0) {
+      return writeXml(image, doc);
     }
-    return writeXml(image, doc);
+    return null;
   }
 
   private Path writeXml(String image, Document doc) throws TransformerException, IOException {
