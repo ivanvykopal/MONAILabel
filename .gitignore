@@ -174,3 +174,5 @@ tests/data
 datasets/**/*.png
 *.xml
 *.zip
+
+tmp/*

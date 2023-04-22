@@ -1,33 +1,33 @@
-# Copyright (c) MONAI Consortium
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#     http://www.apache.org/licenses/LICENSE-2.0
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#FROM tensorflow/tensorflow:2.8.0-gpu-jupyter
+FROM nvidia/cuda:11.6.1-cudnn8-runtime-ubuntu20.04
 
-# To build with a different base image
-# please run `./runtests.sh --clean && DOCKER_BUILDKIT=1 docker build -t projectmonai/monailabel:latest .`
-# to use different version of MONAI pass `--build-arg MONAI_IMAGE=...`
+ENV LANG C.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
+#ENV TZ=Europe/Bratislava
+#RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-ARG MONAI_IMAGE=projectmonai/monai:1.1.0
+COPY . /src
+WORKDIR /src
+RUN apt-get update && apt-get install -y \
+  openslide-tools \
+  npm \
+  dos2unix
 
-FROM ${MONAI_IMAGE} as build
-LABEL maintainer="monai.contact@gmail.com"
-ARG BUILD_OHIF=true
+RUN dos2unix /src/monailabel/scripts/monailabel
 
-ADD . /opt/monailabel/
-RUN apt update -y && apt install openslide-tools npm -y && npm install --global yarn
-RUN python -m pip install --upgrade --no-cache-dir pip setuptools wheel twine \
-    && cd /opt/monailabel \
-    && BUILD_OHIF=${BUILD_OHIF} python setup.py sdist bdist_wheel --build-number $(date +'%Y%m%d%H%M')
+RUN apt-get install -y python3.10 \
+  python3-pip
 
-FROM ${MONAI_IMAGE}
-LABEL maintainer="monai.contact@gmail.com"
+RUN pip3 --no-cache-dir install --upgrade pip
+RUN pip3 --no-cache-dir install \
+  setuptools \
+  wheel \
+  twine
 
-COPY --from=build /opt/monailabel/dist/monailabel* /opt/monailabel/dist/
-RUN python -m pip install --upgrade --no-cache-dir pip \
-    && python -m pip install /opt/monailabel/dist/monailabel*.whl
+RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio===0.13.1+cu116 -f https://download.pytorch.org/whl/cu116/torch_stable.html
+ENV PATH="${PATH}:/src/monailabel/scripts"
+
+#EXPOSE 5555
+
+#CMD ["monailabel", "start_server", "--app", "apps/pathology", "--studies", "datasets/"]
