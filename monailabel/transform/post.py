@@ -315,7 +315,7 @@ class PostProcess(MapTransform):
         return False
 
     def _merge_nearest_endocards(self, mask):
-        endocard_mask = mask[:, :, 2]
+        endocard_mask = mask[:, :, -1]
         struct_elem = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
         dilate_count = 0
 
@@ -335,7 +335,7 @@ class PostProcess(MapTransform):
         for _ in range(dilate_count):
             endocard_mask = cv2.erode(endocard_mask, struct_elem)
 
-        mask[:, :, 2] = endocard_mask
+        mask[:, :, -1] = endocard_mask
         return mask
 
 
@@ -457,7 +457,7 @@ class FindContoursCustom(MapTransform):
                         continue
 
                     contour = np.squeeze(contour)
-                    area = cv2.contourArea(contour)
+                    #area = cv2.contourArea(contour)
                     # if area < min_poly_area:  # Ignore poly with lesser area
                     #    continue
                     # if 0 < max_poly_area < area:  # Ignore very large poly (e.g. in case of nuclei)
