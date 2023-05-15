@@ -19,6 +19,24 @@
         }
       },
       "labels": {}
+    },
+    "1074a8ebe98b45359ce0912e95c8cdc3-patch-0_0_0_0": {
+      "image": {
+        "ext": ".png",
+        "info": {
+          "ts": 1682454186,
+          "name": "1074a8ebe98b45359ce0912e95c8cdc3-patch-0_0_0_0.png"
+        }
+      },
+      "labels": {
+        "final": {
+          "ext": ".xml",
+          "info": {
+            "ts": 1682454186,
+            "name": "1074a8ebe98b45359ce0912e95c8cdc3-patch-0_0_0_0.xml"
+          }
+        }
+      }
     }
   }
 }
