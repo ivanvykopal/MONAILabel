@@ -189,16 +189,20 @@ def infere(network, data, config, cell_mask):
         else:
             cell_mask_patch = cell_mask[y:y + patch_size, x:x + patch_size]
 
-        window2 = tf.image.resize(window, [patch_size // 2, patch_size // 2], method='bilinear')
-        # Pre ucely nahradenia segmentacie jadierok
-        window = np.concatenate(
-            (window, np.expand_dims(cell_mask_patch, -1)),
-            axis=-1
-        )
-        window = np.expand_dims(window, axis=0)
-        window2 = np.expand_dims(window2, axis=0)
-        #window = tf.convert_to_tensor(window, dtype=tf.float32)
-        img = [window, window2]
+        if config['model'].lower() == 'u-net++':
+            window2 = tf.image.resize(window, [patch_size // 2, patch_size // 2], method='bilinear')
+            # Pre ucely nahradenia segmentacie jadierok
+            window = np.concatenate(
+                (window, np.expand_dims(cell_mask_patch, -1)),
+                axis=-1
+            )
+
+            window = np.expand_dims(window, axis=0)
+            window2 = np.expand_dims(window2, axis=0)
+            #window = tf.convert_to_tensor(window, dtype=tf.float32)
+            img = [window, window2]
+        else:
+            img = window
 
         pred_mask = network.predict(img)
 

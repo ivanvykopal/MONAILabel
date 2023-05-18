@@ -8,35 +8,11 @@
       "image": {
         "ext": ".svs",
         "info": {
-          "ts": 1679420509,
-          "name": "JP2K-33003-1.svs",
-          "strategy": {
-            "wsi_random": {
-              "ts": 1679946772,
-              "client_id": "admin"
-            }
-          }
+          "ts": 1684353445,
+          "name": "JP2K-33003-1.svs"
         }
       },
       "labels": {}
-    },
-    "1074a8ebe98b45359ce0912e95c8cdc3-patch-0_0_0_0": {
-      "image": {
-        "ext": ".png",
-        "info": {
-          "ts": 1682454186,
-          "name": "1074a8ebe98b45359ce0912e95c8cdc3-patch-0_0_0_0.png"
-        }
-      },
-      "labels": {
-        "final": {
-          "ext": ".xml",
-          "info": {
-            "ts": 1682454186,
-            "name": "1074a8ebe98b45359ce0912e95c8cdc3-patch-0_0_0_0.xml"
-          }
-        }
-      }
     }
   }
 }
