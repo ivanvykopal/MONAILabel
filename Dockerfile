@@ -30,6 +30,8 @@ RUN pip3 install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio===0.13
 RUN pip3 install --no-cache-dir -r requirements.txt
 ENV PATH="${PATH}:/src/monailabel/scripts"
 
+RUN export PATH="${PATH}:/usr/local/nvidia/bin:/usr/local/cuda/bin"
+
 EXPOSE 8000
 
-CMD ["python3", "-m", "monailabel.main", "start_server", "--app", "apps/pathology", "--studies", "datasets/"]
+#CMD ["python3", "-m", "monailabel.main", "start_server", "--app", "apps/pathology", "--studies", "datasets/"]

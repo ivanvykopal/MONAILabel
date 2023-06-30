@@ -1,0 +1,18 @@
+version: '3.5'
+
+services:
+  server:
+    container_name: monailabel
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    tty: true
+    ports:
+      - 8000:8000
+    command: "python3 -m monailabel.main start_server --app apps/pathology --studies datasets/"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]

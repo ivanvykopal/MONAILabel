@@ -128,7 +128,15 @@ pip install monailabel-weekly -U
 #### [Docker](https://hub.docker.com/r/projectmonai/monailabel/tags)
 
 ```bash
-docker run --gpus all --rm -ti --ipc=host --net=host projectmonai/monailabel:latest bash
+docker build -t monailabel .
+
+docker run --gpus all --rm -ti -p 8000:8000 monailabel bash
+```
+
+or you can use the following command
+
+```bash
+docker compose up
 ```
 
 ---

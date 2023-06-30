@@ -14,7 +14,7 @@ from apps.pathology.lib.infers.utils import BundleConstants
 from apps.pathology.model.pathology_structure_segmentation_nestedunet.models.model import NestedUnet
 
 import numpy as np
-from lib.transforms import LoadImagePatchd, PostFilterLabeld
+from apps.pathology.lib.transforms import LoadImagePatchd, PostFilterLabeld
 from monai.transforms import FromMetaTensord, LoadImaged, SaveImaged, SqueezeDimd
 
 from monailabel.interfaces.tasks.infer_v2 import InferType

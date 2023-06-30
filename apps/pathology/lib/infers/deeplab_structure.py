@@ -14,7 +14,7 @@ from apps.pathology.lib.infers.utils import BundleConstants
 from apps.pathology.model.pathology_structure_segmentation_deeplabv3plus.models.model import DeepLabV3Plus
 
 import numpy as np
-from lib.transforms import LoadImagePatchd, PostFilterLabeld
+from apps.pathology.lib.transforms import LoadImagePatchd, PostFilterLabeld
 from monai.transforms import FromMetaTensord, LoadImaged, SaveImaged, SqueezeDimd
 
 from monailabel.interfaces.tasks.infer_v2 import InferType

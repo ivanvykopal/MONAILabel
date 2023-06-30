@@ -14,7 +14,7 @@ from typing import Any, Callable, Dict, Optional, Sequence
 
 import numpy as np
 import torch
-from lib.transforms import ConvertInteractiveClickSignals, LoadImagePatchd
+from apps.pathology.lib.transforms import ConvertInteractiveClickSignals, LoadImagePatchd
 from monai.apps.nuclick.transforms import AddLabelAsGuidanced, NuclickKeys, PostFilterLabeld
 from monai.transforms import KeepLargestConnectedComponentd, LoadImaged, SaveImaged, SqueezeDimd
 
