@@ -31,9 +31,8 @@ Pre nainštalovanie MONAI Label spolu s pridanými modelmi pre segmentáciu vyš
     git fetch --all
     git checkout development
     ```
-4. Stiahnuť váhy pre pridané modely z `Weights` z [Google Drive](https://drive.google.com/drive/folders/17Co6XpxxykH2mJprgUmO1OHsrqj-Ybhh?usp=sharing). Je potrebné schválenie administrátorom.
-5. Stiahnuť detektory a scripty zo `Scripts` z [Google Drive](https://drive.google.com/drive/folders/17Co6XpxxykH2mJprgUmO1OHsrqj-Ybhh?usp=sharing) pre identifikáciu tkaniva a buniek v rámci WSI snímku spolu aj s výslednou klasifikáciou buniek. Je potrebné schválenie administrátorom.
-6. V rámci stiahnutých zdrojových kódov vytvorte prostredie pre python:
+4. Pre stiahnutie váh modelov a vzorovéhoQuPath projektu je potrebné kontaktovať výskumnú skupinu Vision & Graphic Group (VGG) z FIIT STU, ktorá má váhy modelov a vzorový projekt pod svojou správou.
+5. V rámci stiahnutých zdrojových kódov vytvorte prostredie pre python:
    - S využitím príkazu `venv`
       ```bash
       virtualenv ".venv/monailabel" -p python3.9.16
@@ -43,7 +42,7 @@ Pre nainštalovanie MONAI Label spolu s pridanými modelmi pre segmentáciu vyš
       conda create -n "monailabel" python=3.9.16
       ```
      Odporúčame využívať [Anaconda](https://www.anaconda.com/products/distribution) alebo [Miniconda](https://docs.conda.io/en/latest/miniconda.html) pre správu viacerých prostredí.
-7. Nainštalovať balíčky z `requirements.txt`
+6. Nainštalovať balíčky z `requirements.txt`
     - `venv`
       ```bash
       .venv/monailabel/Scripts/activate
@@ -56,14 +55,14 @@ Pre nainštalovanie MONAI Label spolu s pridanými modelmi pre segmentáciu vyš
       python -m pip install --upgrade pip
       pip install -r requirements.txt
       ```
-8. Stiahnuť a nainštalovať [Cuda Toolkit 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive). Postupujte podľa krokov inštalácie. 
-9. Po nainštalovaní Cuda Toolkit je potrebné reštartovať počítač pre správnu konfiguráciu a nastavenie Cuda.
-10. Stiahnuť [openslide binaries](https://openslide.org/download/) a extrahovať ich na ľubovolnom mieste. Po extrakcii je potrebné pridať cetu k `bin` adresáru do premenných prostredia v `PATH`.
-11. Pridať do premenných prostedia do `PATH` cestu k `monailabel\scripts` nachádzajúcich sa v tomto adresári (Príklad pre [macOS](https://www.cyberciti.biz/faq/appleosx-bash-unix-change-set-path-environment-variable/)). V prípade, ak chýba jú nejaké `dll` knižnice je ich možné stiahnuť z [dll-files.com](https://www.dll-files.com/) a konkrétne, ak by išlo o chýbajúce `cudnn64_8.dll`, tak je ho možné stiahnuť pomocou tohto [odkazu](https://www.dll-files.com/cudnn64_8.dll.html). Stiahnuté `dll` súbory je potrebné skopírovať na systémový disk štandarde na windows systémoch je to `C:\Windows\System32`.
-12. Stiahnuť najnovšie MONAI Label rozšírenie pre QuPath z [repozitára](https://github.com/ivanvykopal/MONAILabel/tags). Najnovšie rozšírenie sa nachádza v poslednom `Release` ako `qupath-extension-monailabel-{version}.jar`, pričom `version` predstavuje identifikátor poslednej verzie, príklad verzie `0.3.1.5`.
-13. Pre pridanie MONAI Label rozšírenia je potrebné spustiť QuPath a stiahnutý súbor `qupath-extension-monailabel-{version}.jar` potiahnuť do oblasti QuPath a odsúhlasiť dialogove okno. Týmto sa do QuPath nainštaluje rozšírenie pre MONAI Label.
-14. Stiahnuté váhy pre `pathology_structure_segmentation_nestedunet` pridajte do `apps/pathology/model/pathology_structure_segmentation_nestedunet/models` a váhy pre `pathology_structure_segmentation_deeplabv3plus` pridajte do `apps/pathology/model/pathology_structure_segmentation_deeplabv3plus/models`.
-15. Po spustení QuPath v časti `Edit` > `Preferences...` > `MONAI Label` zmente Server URL na `http://0.0.0.0:8000`.
+7. Stiahnuť a nainštalovať [Cuda Toolkit 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive). Postupujte podľa krokov inštalácie. 
+8. Po nainštalovaní Cuda Toolkit je potrebné reštartovať počítač pre správnu konfiguráciu a nastavenie Cuda.
+9. Stiahnuť [openslide binaries](https://openslide.org/download/) a extrahovať ich na ľubovolnom mieste. Po extrakcii je potrebné pridať cetu k `bin` adresáru do premenných prostredia v `PATH`.
+10. Pridať do premenných prostedia do `PATH` cestu k `monailabel\scripts` nachádzajúcich sa v tomto adresári (Príklad pre [macOS](https://www.cyberciti.biz/faq/appleosx-bash-unix-change-set-path-environment-variable/)). V prípade, ak chýba jú nejaké `dll` knižnice je ich možné stiahnuť z [dll-files.com](https://www.dll-files.com/) a konkrétne, ak by išlo o chýbajúce `cudnn64_8.dll`, tak je ho možné stiahnuť pomocou tohto [odkazu](https://www.dll-files.com/cudnn64_8.dll.html). Stiahnuté `dll` súbory je potrebné skopírovať na systémový disk štandarde na windows systémoch je to `C:\Windows\System32`.
+11. Stiahnuť najnovšie MONAI Label rozšírenie pre QuPath z [repozitára](https://github.com/ivanvykopal/MONAILabel/tags). Najnovšie rozšírenie sa nachádza v poslednom `Release` ako `qupath-extension-monailabel-{version}.jar`, pričom `version` predstavuje identifikátor poslednej verzie, príklad verzie `0.3.1.5`.
+12. Pre pridanie MONAI Label rozšírenia je potrebné spustiť QuPath a stiahnutý súbor `qupath-extension-monailabel-{version}.jar` potiahnuť do oblasti QuPath a odsúhlasiť dialogove okno. Týmto sa do QuPath nainštaluje rozšírenie pre MONAI Label.
+13. Stiahnuté váhy pre `pathology_structure_segmentation_nestedunet` pridajte do `apps/pathology/model/pathology_structure_segmentation_nestedunet/models` a váhy pre `pathology_structure_segmentation_deeplabv3plus` pridajte do `apps/pathology/model/pathology_structure_segmentation_deeplabv3plus/models`.
+14. Po spustení QuPath v časti `Edit` > `Preferences...` > `MONAI Label` zmente Server URL na `http://0.0.0.0:8000`.
 
 ## Spustenie servera
 
@@ -92,18 +91,15 @@ monailabel start_server --app apps/pathology --studies datasets/
 
 ## Segmentácia v QuPath
 
-1. Vytvorte QuPath projekt a do vytvoreného projektu nahrajte snímky, ktoré chcete analyzovať. Vo vytvorenom projekte nahraďte adresár `classifiers` adresárom `classifiers` stiahnutým z [Google Drive](https://drive.google.com/drive/folders/1bhz1DO326o8tb0fFrWJbUx2rqfqWRAYy).
+Pre vykonanie segmentácie vyšších morfologických štruktúr si naimportujte WSI snímky do QuPath projektu stiahnutého pri inštalácii.
 
-2. Prekopírujte adresár `scripts` z [Google Drive](https://drive.google.com/drive/folders/1bhz1DO326o8tb0fFrWJbUx2rqfqWRAYy) do vytvoreného QuPath projektu do rovnakého adresára, v ktorom sa nachádza adresár `classifiers`.
+1. Vytvorte anotácie pre tkanivo a bunky spolu s ich klasifikáciami. Pre tento krok je možné využiť stiahnutý script.
 
-3. Vytvorte anotácie pre tkanivo a bunky spolu s ich klasifikáciami. Pre tento krok je možné využiť stiahnutý script alebo napísať vlastný.
+    Pre využitie stiahnutého scriptu `Tissue detection and cell detection.groovy` otvorte v paneli `Automate` > `Show script editor`. Po otvorení `Script editora` zvoľte `File` > `Open...` a vyberte adresár, v ktorom sa nachádzajú stiahnuté scripty a vyberte script `Tissue detection and cell detection.groovy`. Po načítaní scriptu zvoľte možnosť `Run`, čím prebehne segmentácia tkaniva a buniek a klasifikácia buniek.
 
-    Pre využitie stiahnutého scriptu `Tissue detection and cell detection.groovy` otvorte v paneli `Automate` > `Show script editor`. Po otvorení Script editora zvoľte `File` > `Open...` vyberte adresár, v ktorom sa nachádzajú stiahnuté scripty a vyberte script `Tissue detection and cell detection.groovy`. Po načítaní scriptu zvoľte možnosť `Run`, čím prebehne segmentácia tkaniva a buniek a klasifikácia buniek.
+2. Vyznačenie čast WSI snímku, pre ktorý sa má vykonať predikcia.
 
-
-2. Vyznačenie časti snímku, pre ktorý sa má vykonať predikcia.
-
-![Background](docs/images/qupath/QuPath1.jpg)
+    ![Background](docs/images/qupath/QuPath1.jpg)
 
 3. Zvoľte možnosť `MONAI Label` > `Annotations...` a následne vyberte model, ktorým chcete vykonať predikciu v časti `Model Name`.
 
@@ -113,12 +109,11 @@ monailabel start_server --app apps/pathology --studies datasets/
 
     Po výbere modelu stlačte `OK`.
 
-![Background](docs/images/qupath/QuPath2.jpg)
+    ![Background](docs/images/qupath/QuPath2.jpg)
 
 4. Po dokončení predikcie sú výsledky dostupné v QuPath, kde ich je možné upravovať, mazať poprípade doplniť chýbajúce anotácie manuálne.
 
-![Background](docs/images/qupath/QuPath3.png)
-
+    ![Background](docs/images/qupath/QuPath3.png)
 
 Pre výber anotácií, ktoré chceme vymazať je potrebné spustiť `Selection mode`, ktorý zvolíme možnosťou `S` nachádzajúcim sa v paneli. Po zapnutí `Selection mode` je možné využiť rôzne spôsoby výberu, či už s využitím obdĺžnika alebo pomocou štetca (brush). Pre zrušenie `Selection mode` kliknite opätovne možnosť `S`.
 
