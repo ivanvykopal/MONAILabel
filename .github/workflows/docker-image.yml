@@ -27,4 +27,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/monailabel-server:${{ steps.vars.outputs.tag }} , ${{ secrets.DOCKER_HUB_USERNAME }}/monailabel-server:latest
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/monailabel-server:0.1.0 , ${{ secrets.DOCKER_HUB_USERNAME }}/monailabel-server:latest
