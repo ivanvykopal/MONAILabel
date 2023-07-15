@@ -1,5 +1,5 @@
 #FROM tensorflow/tensorflow:2.8.0-gpu-jupyter
-FROM nvidia/cuda:11.2.0-cudnn8-runtime-ubuntu20.04
+FROM nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
 
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
