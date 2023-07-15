@@ -1,23 +1,19 @@
 {
-  "model": "U-Net++",
-  "type": "he",
+  "model": "U-Net",
+  "type": "srel",
   "lab": 0,
   "overlay": 1,
-  "image_size": 256,
-  "channels": 4,
-  "input_images": 2,
+  "image_size": 512,
+  "channels": 3,
+  "input_images": 1,
   "output_masks": 1,
-  "batch_size": 16,
+  "batch_size": 8,
   "padding": "same",
   "filters": 32,
   "classes": [
-    "blood_vessels",
-    "inflammations",
     "endocardiums"
   ],
   "classes_names": [
-    "Blood vessels",
-    "Inflammation",
     "Endocardium"
   ],
   "initializer": "he_normal",
@@ -25,6 +21,6 @@
   "kernel_size": 3,
   "up": "conv",
   "pool": "max",
-  "dropout": 0.5,
-  "threshold": 0.2
+  "dropout": 0.2,
+  "threshold": 0.5
 }

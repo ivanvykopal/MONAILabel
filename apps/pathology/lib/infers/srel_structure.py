@@ -11,7 +11,7 @@
 import logging
 from typing import Any, Callable, Dict, Sequence
 from apps.pathology.lib.infers.utils import BundleConstants, load_json
-from apps.pathology.model.pathology_structure_segmentation_deeplabv3plus.models.model import DeepLabV3Plus
+from apps.pathology.model.pathology_srel_segmentation.models.model import UNet
 
 import numpy as np
 from apps.pathology.lib.transforms import LoadImagePatchd, PostFilterLabeld
@@ -25,7 +25,7 @@ from monailabel.transform.writer import PolygonWriter
 logger = logging.getLogger(__name__)
 
 
-class DeepLabV3PlusStructure(BundleInferTask):
+class SRelStructure(BundleInferTask):
     """
     This provides Inference Engine for pre-trained DeepLabV3+ model segmentation + Classification model.
     """
@@ -34,23 +34,16 @@ class DeepLabV3PlusStructure(BundleInferTask):
     def __init__(self, path: str, conf: Dict[str, str], **kwargs):
         const = BundleConstants(
             model_pytorch=[
-                "1670105766.4486911_DeepLabV3+_IKEM.index",
-                "1670082792.2425365_DeepLabV3+_IKEM.index",
-                "1670100756.0503645_DeepLabV3+_IKEM.index"
+                "1681915228.861842_U-Net_IKEM SRel.index",
             ],
             models=[
-                DeepLabV3Plus,
-                DeepLabV3Plus,
-                DeepLabV3Plus,
+                UNet,
             ],
             config_paths=[
-                'apps/pathology/model/pathology_structure_segmentation_deeplabv3plus/configs/config.json',
-                'apps/pathology/model/pathology_structure_segmentation_deeplabv3plus/configs/config2.json',
-                'apps/pathology/model/pathology_structure_segmentation_deeplabv3plus/configs/config3.json',
+                'apps/pathology/model/pathology_srel_segmentation/configs/config.json',
             ]
 
         )
-        # const = BundleConstants(model_pytorch="1670105766.4486911_DeepLabV3+_IKEM.index")
         super().__init__(
             path,
             conf,
@@ -61,20 +54,16 @@ class DeepLabV3PlusStructure(BundleInferTask):
             load_strict=True,
             tensorflow=True,
             const=const,
-            **kwargs,
+            ** kwargs,
         )
 
         self._custom_config = load_json(const.config_paths()[0])
 
         # Override Labels
         self.labels = {
-            "Blood vessels": 0,
-            "Inflammation": 1,
-            "Endocardium": 2,
+            "Endocardium": 0,
         }
         self.label_colors = {
-            "Blood vessels": (255, 0, 0),
-            "Inflammation": (255, 255, 0),
             "Endocardium": (0, 0, 255),
         }
         self._config["label_colors"] = self.label_colors

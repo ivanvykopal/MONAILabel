@@ -12,6 +12,9 @@
 import ctypes.util
 import platform
 from ctypes import cdll
+import os
+os.environ['PATH'] = "C:\\Windows\\System32" + ";" + \
+    os.environ['PATH']  # libvips-bin-path is where you save the libvips files
 
 # For windows (preload openslide dll using file_library) https://github.com/openslide/openslide-python/pull/151
 if platform.system() == "Windows":

@@ -1,4 +1,5 @@
 from typing import Sequence
+import json
 
 
 class BundleConstants:
@@ -80,3 +81,10 @@ class BundleConstants:
 
     def key_displayable_configs(self) -> Sequence[str]:
         return self._key_displayable_configs
+
+
+def load_json(filename):
+    with open(filename, "r") as f:
+        data = json.load(f)
+
+    return data

@@ -15,3 +15,4 @@ from .nuclick import NuClick
 from .segmentation_nuclei import SegmentationNuclei
 from .deeplab_structure import DeepLabV3PlusStructure
 from .nestedunet_structure import NestedUnetStructure
+from .srel_structure import SRelStructure

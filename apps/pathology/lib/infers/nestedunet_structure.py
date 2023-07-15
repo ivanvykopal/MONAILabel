@@ -10,7 +10,7 @@
 # limitations under the License.
 import logging
 from typing import Any, Callable, Dict, Sequence
-from apps.pathology.lib.infers.utils import BundleConstants
+from apps.pathology.lib.infers.utils import BundleConstants, load_json
 from apps.pathology.model.pathology_structure_segmentation_nestedunet.models.model import NestedUnet
 
 import numpy as np
@@ -58,6 +58,8 @@ class NestedUnetStructure(BundleInferTask):
             ** kwargs,
         )
 
+        self._custom_config = load_json(const.config_paths()[0])
+
         # Override Labels
         self.labels = {
             "Blood vessels": 0,
@@ -82,10 +84,9 @@ class NestedUnetStructure(BundleInferTask):
         t.extend(
             [
                 PostFilterLabeld(keys="pred"),
-                PostProcessAnnotations(keys="pred", xml_path=xml_path),
                 PostProcess(keys="pred"),
-                FindContoursCustom(keys="pred", labels=self.labels,
-                                   max_poly_area=128 * 128),
+                PostProcessAnnotations(keys="pred", xml_path=xml_path, config=self._custom_config),
+                FindContoursCustom(keys="pred", labels=self.labels),
             ]
         )
         return t

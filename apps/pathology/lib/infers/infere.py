@@ -62,15 +62,15 @@ def get_fragment(image, x, y, patch_size, fill_value=255):
 def reorder_channels(mask, config):
     new_mask = np.zeros_like(mask)
 
-    if config['classes'] == ["blood_vessels", "inflammations", "endocariums"]:
+    if config['classes'] == ["blood_vessels", "inflammations", "endocardiums"]:
         new_mask = mask.numpy()
-    elif config['classes'] == ["inflammations", "blood_vessels", "endocariums"]:
+    elif config['classes'] == ["inflammations", "blood_vessels", "endocardiums"]:
         new_mask[:, :, 0] = mask[:, :, 0]
         new_mask[:, :, 1] = mask[:, :, 2]
         new_mask[:, :, 2] = mask[:, :, 1]
         new_mask[:, :, 3] = mask[:, :, 3]
 
-    elif config['classes'] == ["endocariums", "blood_vessels", "inflammations"]:
+    elif config['classes'] == ["endocardiums", "blood_vessels", "inflammations"]:
         new_mask[:, :, 0] = mask[:, :, 0]
         new_mask[:, :, 1] = mask[:, :, 2]
         new_mask[:, :, 2] = mask[:, :, 3]
@@ -80,6 +80,12 @@ def reorder_channels(mask, config):
 
 
 def applicate_augmentations(aug, img, mask, batch_size):
+    is_list = True
+    if type(img) is not list:
+        is_list = False
+        img = [img]
+        mask = [mask]
+
     output_img = []
     for image_idx in range(len(img)):
         new_img = np.zeros_like(img[image_idx])
@@ -87,6 +93,11 @@ def applicate_augmentations(aug, img, mask, batch_size):
             augmented = aug(image=img[image_idx][idx_batch], mask=mask[idx_batch])
             new_img[idx_batch] = augmented['image']
         output_img.append(new_img)
+
+    if not is_list:
+        output_img = output_img[0]
+        mask = mask[0]
+
     return output_img, mask
 
 
@@ -167,7 +178,13 @@ def deeplab_infere(networks, data, configs):
 
 
 def infere(network, data, config, cell_mask):
+    isSReL = config['type'] == 'srel'
+
     patch_size = config['image_size']
+    if isSReL:
+        original_x, original_y = data.shape[0], data.shape[1]
+        data = cv.resize(data, None, fx=0.5, fy=0.5)
+
     horizontal_flip = A.HorizontalFlip(p=1)
     vertical_flip = A.VerticalFlip(p=1)
 
@@ -176,14 +193,14 @@ def infere(network, data, config, cell_mask):
         A.VerticalFlip(p=1)
     ])
 
-    canvas = np.zeros_like(data, dtype='float16')
-    divim = np.zeros_like(data, dtype='uint8')
+    canvas = np.zeros((data.shape[0], data.shape[1], len(config['classes'])), dtype='float16')
+    divim = np.zeros((data.shape[0], data.shape[1], len(config['classes'])), dtype='uint8')
 
     mask = np.zeros((1, patch_size, patch_size, len(config['classes'])))
 
     for (x, y, window) in sliding_window(data, stepSize=patch_size // 2, windowSize=(patch_size, patch_size)):
         if window.shape[0] != patch_size or window.shape[1] != patch_size:
-            window = get_fragment(window, x, y, patch_size, fill_value=1)
+            window = get_fragment(window, x, y, patch_size, fill_value=1. if isSReL else 1.)
             cell_mask_patch = get_fragment(cell_mask[y:y + patch_size, x:x +
                                            patch_size], x, y, patch_size, fill_value=0)
         else:
@@ -202,7 +219,7 @@ def infere(network, data, config, cell_mask):
             #window = tf.convert_to_tensor(window, dtype=tf.float32)
             img = [window, window2]
         else:
-            img = window
+            img = np.expand_dims(window, axis=0)
 
         pred_mask = network.predict(img)
 
@@ -233,7 +250,12 @@ def infere(network, data, config, cell_mask):
     divim[divim == 0] = 1
     canvas /= divim
 
-    return np.array(canvas > config['threshold'], dtype='uint8')
+    canvas = np.array(canvas > config['threshold'], dtype='uint8')
+
+    if isSReL:
+        canvas = cv.resize(canvas, (original_y, original_x))
+
+    return canvas
 
 
 def main(directory='tmp', xml_path=None):

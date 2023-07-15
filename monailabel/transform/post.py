@@ -10,7 +10,7 @@
 # limitations under the License.
 
 import logging
-from typing import Dict, Hashable, Mapping, Optional, Sequence, Union
+from typing import Dict, Hashable, Mapping, Optional, Sequence, Union, List
 
 import cv2
 import numpy as np
@@ -253,7 +253,9 @@ class PostProcess(MapTransform):
 
         for key in self.keys:
             p = d[key]
-            p = convert_to_numpy(d[key]) if isinstance(d[key], torch.Tensor) else d[key]
+            if len(p.shape) == 2:
+                p = np.expand_dims(p, axis=-1)
+            p = convert_to_numpy(p) if isinstance(p, torch.Tensor) else p
             final_mask = np.zeros_like(p)
 
             labels = p.shape[-1]
@@ -321,7 +323,7 @@ class PostProcess(MapTransform):
 
         while True:
             geojson_file = create_geojson(endocard_mask, [
-                "endocariums"
+                "endocardium"
             ])
             gdf_endocard = gpd.GeoDataFrame.from_features(geojson_file)
 
@@ -344,12 +346,14 @@ class PostProcessAnnotations(MapTransform):
         self,
         keys: KeysCollection,
         xml_path: str,
+        config: Dict[str, Union[str, int, List[str], float]] = None
     ):
         super().__init__(keys)
         self.kernel_size = (51, 51)
         self.area_treshold = 2500
         self.dilate = True
         self.xml_path = xml_path
+        self.config = config
 
     def __call__(self, data):
         d = dict(data)
@@ -359,11 +363,7 @@ class PostProcessAnnotations(MapTransform):
             p = convert_to_numpy(d[key]) if isinstance(d[key], torch.Tensor) else d[key]
             final_mask = p
 
-            geojson_file = create_geojson(final_mask, [
-                "blood_vessels",
-                "inflammations",
-                "endocardiums"
-            ])
+            geojson_file = create_geojson(final_mask, self.config['classes'])
             gdf = gpd.GeoDataFrame.from_features(geojson_file)
             try:
                 gj = xml2geojson(f'./datasets/labels/final/{self.xml_path}')
@@ -380,7 +380,7 @@ class PostProcessAnnotations(MapTransform):
             final_mask = get_mask(
                 final_mask.shape,
                 gdf.to_dict(orient='records'),
-                ["Blood vessels", "Inflammation", "Endocardium"]
+                self.config['classes_names']
             )
             d[key] = final_mask
 
@@ -394,20 +394,16 @@ class FindContoursCustom(MapTransform):
         self,
         keys: KeysCollection,
         min_positive=10,
-        min_poly_area=80,
-        max_poly_area=0,
         result="result",
         result_output_key="annotation",
         key_label_colors="label_colors",
         key_foreground_points=None,
         labels=None,
-        colormap=None,
+        colormap=None
     ):
         super().__init__(keys)
 
         self.min_positive = min_positive
-        self.min_poly_area = min_poly_area
-        self.max_poly_area = max_poly_area
         self.result = result
         self.result_output_key = result_output_key
         self.key_label_colors = key_label_colors
@@ -426,8 +422,6 @@ class FindContoursCustom(MapTransform):
         d = dict(data)
         location = d.get("location", [0, 0])
         size = d.get("size", [0, 0])
-        min_poly_area = d.get("min_poly_area", self.min_poly_area)
-        max_poly_area = d.get("max_poly_area", self.max_poly_area)
         color_map = d.get(self.key_label_colors) if self.colormap is None else self.colormap
 
         foreground_points = d.get(self.key_foreground_points, []) if self.key_foreground_points else []
@@ -457,11 +451,6 @@ class FindContoursCustom(MapTransform):
                         continue
 
                     contour = np.squeeze(contour)
-                    #area = cv2.contourArea(contour)
-                    # if area < min_poly_area:  # Ignore poly with lesser area
-                    #    continue
-                    # if 0 < max_poly_area < area:  # Ignore very large poly (e.g. in case of nuclei)
-                    #    continue
 
                     contour[:, 0] += location[0]  # X
                     contour[:, 1] += location[1]  # Y

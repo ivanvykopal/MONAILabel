@@ -1,6 +1,7 @@
 {
   "dataset_name": "IKEM",
   "model": "DeepLabV3+",
+  "type": "he",
   "lab": 0,
   "overlay": 1,
   "image_size": 512,
@@ -14,13 +15,18 @@
   "classes": [
     "inflammations",
     "blood_vessels",
-    "endocariums"
+    "endocardiums"
+  ],
+  "classes_names": [
+    "Inflammation",
+    "Blood vessels",
+    "Endocardium"
   ],
   "final_classes": [
     "background",
     "inflammations",
     "blood_vessels",
-    "endocariums"
+    "endocardiums"
   ],
   "initializer": "he_normal",
   "activation": "softmax",
