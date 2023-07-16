@@ -11,7 +11,8 @@ WORKDIR /src
 RUN apt-get update && apt-get install -y \
   openslide-tools \
   npm \
-  dos2unix
+  dos2unix \
+  nvidia-cuda-toolkit
 
 RUN dos2unix /src/monailabel/scripts/monailabel
 
