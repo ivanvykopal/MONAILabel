@@ -13,19 +13,21 @@ limitations under the License.
 
 package qupath.lib.extension.monailabel.commands;
 
+import java.awt.Color;
+import java.awt.Robot;
+import java.awt.event.KeyEvent;
 import java.io.FileOutputStream;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.HashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -37,6 +39,8 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.OutputKeys;
 
+import javafx.concurrent.Task;
+import org.controlsfx.dialog.ProgressDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -85,33 +89,24 @@ public class RunInference implements Runnable {
   @Override
   public void run() {
     Path annotationXML = null;
+    // addUndoConfirmationListener(qupath.getStage());
     try {
       var viewer = qupath.getViewer();
       var imageData = viewer.getImageData();
       var selected = imageData.getHierarchy().getSelectionModel().getSelectedObject();
       var roi = selected != null ? selected.getROI() : null;
 
+      if (roi == null || !(roi instanceof RectangleROI)) {
+        Dialogs.showPlainMessage("Please create and select ROI", "Please create and select a Rectangle ROI before " +
+            "running this method.\nThe \"Annotations\" function creates annotations within the selected rectangle.");
+        return;
+      }
+
       String imageFile = Utils.getFileName(viewer.getImageData().getServerPath());
       String image = StringGenerator.generateName();
       String im = imageFile.toLowerCase();
-      boolean isWSI = (im.endsWith(".png") || im.endsWith(".jpg") || im.endsWith(".jpeg")) ? false : true;
+      boolean isWSI = !im.endsWith(".png") && !im.endsWith(".jpg") && !im.endsWith(".jpeg");
       logger.info("MONAILabel:: isWSI: " + isWSI + "; File: " + imageFile);
-
-      // Select first RectangleROI if not selected explicitly
-      if (isWSI && (roi == null || !(roi instanceof RectangleROI))) {
-        List<PathObject> objs = imageData.getHierarchy().getFlattenedObjectList(null);
-        for (int i = 0; i < objs.size(); i++) {
-          var obj = objs.get(i);
-          ROI r = obj.getROI();
-          if (r instanceof RectangleROI) {
-            roi = r;
-            Dialogs.showWarningNotification("MONALabel",
-                "ROI is NOT explicitly selected; using first Rectangle ROI from Hierarchy");
-            imageData.getHierarchy().getSelectionModel().setSelectedObject(obj);
-            break;
-          }
-        }
-      }
 
       int[] bbox = Utils.getBBOX(roi);
       int tileSize = selectedTileSize;
@@ -128,7 +123,10 @@ public class RunInference implements Runnable {
 
       ParameterList list = new ParameterList();
       list.addChoiceParameter("Model", "Model Name", selectedModel, names);
+      list.addBooleanParameter("ShowDetections", "Show previosly created detections", false);
+      list.addTitleParameter("Parameters of selected ROI:");
       if (isWSI) {
+        list.addEmptyParameter("(do not change, if not necessary)");
         list.addStringParameter("Location", "Location (x,y,w,h)", Arrays.toString(bbox));
         list.addIntParameter("TileSize", "TileSize", tileSize);
         annotationXML = NucleiAnnotations.getAnnotationsXml(image, imageData, bbox);
@@ -149,6 +147,7 @@ public class RunInference implements Runnable {
 
       if (Dialogs.showParameterDialog("MONAILabel", list)) {
         String model = (String) list.getChoiceParameterValue("Model");
+        boolean showDetections = list.getBooleanParameterValue("ShowDetections");
         if (isWSI) {
           bbox = Utils.parseStringArray(list.getStringParameterValue("Location"));
           tileSize = list.getIntParameterValue("TileSize").intValue();
@@ -161,8 +160,56 @@ public class RunInference implements Runnable {
         selectedBBox = bbox;
         selectedTileSize = tileSize;
 
-        runInference(model, info, bbox, tileSize, imageData, imageFile, isWSI, image);
+        final int[] finalBbox = bbox;
+        final int finalTileSize = tileSize;
+
+        // running inference and progress dialog in threads
+        Task<Void> task = new Task<Void>() {
+          @Override
+          protected Void call() throws Exception {
+            runInference(model, info, finalBbox, finalTileSize, imageData, imageFile, isWSI, image);
+            return null;
+          }
+        };
+
+        ProgressDialog progressDialog = new ProgressDialog(task);
+        progressDialog.setTitle("MONAILabel");
+        progressDialog.setHeaderText("Server-side processing is in progress, please wait...");
+        progressDialog.setContentText("Annotations will be drawn immediately after the method ends.");
+        progressDialog.initOwner(qupath.getStage());
+
+        // Start the inference
+        new Thread(task).start();
+
+        task.setOnSucceeded(event -> {
+          progressDialog.close();
+          qupath.getOverlayOptions().showDetectionsProperty().set(showDetections);
+
+          // Autosave project
+          try {
+            Robot robot = new Robot();
+            robot.keyPress(KeyEvent.VK_CONTROL);
+            robot.keyPress(KeyEvent.VK_S);
+            robot.keyRelease(KeyEvent.VK_S);
+            robot.keyRelease(KeyEvent.VK_CONTROL);
+            Dialogs.showInfoNotification("Project Autosave", "Project has been automatically saved.");
+          } catch (Exception e) {
+            Dialogs.showErrorMessage("Project Autosave", "Error occurred while autosaving the project.");
+          }
+        });
+        task.setOnFailed(event -> {
+          progressDialog.close();
+          Throwable ex = task.getException();
+          if (ex != null) {
+            ex.printStackTrace();
+            Dialogs.showErrorMessage("MONAILabel", ex);
+          }
+        });
       }
+
+      imageData.getHierarchy().removeObject(imageData.getHierarchy().getSelectionModel().getSelectedObject(), true);
+      imageData.getHierarchy().getSelectionModel().clearSelection();
+
     } catch (Exception ex) {
       ex.printStackTrace();
       Dialogs.showErrorMessage("MONAILabel", ex);
