@@ -8,6 +8,7 @@ on:
       - apps/**
       - monailabel/**
       - .github/workflows/**
+  workflow_dispatch:
 
 jobs:
   build:
